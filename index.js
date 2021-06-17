@@ -1,3 +1,4 @@
+"use strict";
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -34,11 +35,41 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 };
-var ethers = require("ethers");
+exports.__esModule = true;
+var ethers_1 = require("ethers");
 var connectWallet = function () {
     return __awaiter(this, void 0, void 0, function () {
+        var provider, network, error_1;
         return __generator(this, function (_a) {
-            return [2 /*return*/];
+            switch (_a.label) {
+                case 0:
+                    if (!window.ethereum) return [3 /*break*/, 6];
+                    _a.label = 1;
+                case 1:
+                    _a.trys.push([1, 4, , 5]);
+                    //@ts-ignore
+                    return [4 /*yield*/, window.ethereum.enable()
+                        //@ts-ignore
+                    ];
+                case 2:
+                    //@ts-ignore
+                    _a.sent();
+                    provider = new ethers_1.ethers.providers.Web3Provider(window.ethereum);
+                    return [4 /*yield*/, provider.getNetwork()];
+                case 3:
+                    network = _a.sent();
+                    setNetworkHtml(network.chainId);
+                    return [3 /*break*/, 5];
+                case 4:
+                    error_1 = _a.sent();
+                    console.log("\u26A0\uFE0F " + error_1 + ".");
+                    return [3 /*break*/, 5];
+                case 5: return [3 /*break*/, 7];
+                case 6:
+                    console.log("⚠️ Please install the CeloExtensionWallet.");
+                    _a.label = 7;
+                case 7: return [2 /*return*/];
+            }
         });
     });
 };
@@ -53,3 +84,28 @@ based on the current network detected, users should be shown different options
     - allow users to send ETH to alfajores
     - allow users to send eCELO to another kovan account
 */
+document.querySelector("#login").addEventListener("click", function (e) { return __awaiter(void 0, void 0, void 0, function () {
+    return __generator(this, function (_a) {
+        connectWallet();
+        return [2 /*return*/];
+    });
+}); });
+function setNetworkHtml(chainId) {
+    if (chainId == 44787) {
+        document.querySelector("#network").textContent = "Alfajores";
+    }
+    else if (chainId == 42) {
+        document.querySelector("#network").textContent = "Kovan";
+    }
+    else {
+        console.error("connect to alfajores or kovan.");
+    }
+}
+//@ts-ignore
+ethereum.on('chainChanged', function (chainId) {
+    // Handle the new chain.
+    // Correctly handling chain changes can be complicated.
+    // We recommend reloading the page unless you have good reason not to.
+    setNetworkHtml(chainId);
+    // window.location.reload();
+});
