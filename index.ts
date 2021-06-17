@@ -1,4 +1,5 @@
 import { ethers } from "ethers";
+import { abi } from "./abi/BridgeRouter.json"
 
 const connectWallet = async function () {
     //@ts-ignore
@@ -13,7 +14,8 @@ const connectWallet = async function () {
           setNetworkHtml(network.chainId)
 
           // initalize contract
-    
+          let contract = setContract(network.chainId, provider)
+
         } catch (error) {
           console.log(`⚠️ ${error}.`)
         }
@@ -38,7 +40,7 @@ document.querySelector("#login").addEventListener("click", async (e) => {
     connectWallet()
 })
 
-function setNetworkHtml(chainId:any){
+function setNetworkHtml(chainId:Number){
     if(chainId == 44787){
         document.querySelector("#network").textContent = "Alfajores"
     } else if (chainId == 42){
@@ -46,6 +48,18 @@ function setNetworkHtml(chainId:any){
     } else {
         console.error("connect to alfajores or kovan.")
     }
+}
+
+function setContract(chainId:Number, provider){
+    let contract
+    if(chainId == 44787){
+        // contract = new ethers.Contract(insert_alfa_address, abi, provider)
+    } else if (chainId == 42){
+        // contract = new ethers.Contract(insert_kovan_address, abi, provider)
+    } else {
+        console.log("invalid network")
+    }
+    return contract
 }
 
 //@ts-ignore

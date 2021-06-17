@@ -39,7 +39,7 @@ exports.__esModule = true;
 var ethers_1 = require("ethers");
 var connectWallet = function () {
     return __awaiter(this, void 0, void 0, function () {
-        var provider, network, error_1;
+        var provider, network, contract, error_1;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
@@ -59,6 +59,7 @@ var connectWallet = function () {
                 case 3:
                     network = _a.sent();
                     setNetworkHtml(network.chainId);
+                    contract = setContract(network.chainId, provider);
                     return [3 /*break*/, 5];
                 case 4:
                     error_1 = _a.sent();
@@ -100,6 +101,19 @@ function setNetworkHtml(chainId) {
     else {
         console.error("connect to alfajores or kovan.");
     }
+}
+function setContract(chainId, provider) {
+    var contract;
+    if (chainId == 44787) {
+        // contract = new ethers.Contract(insert_alfa_address, abi, provider)
+    }
+    else if (chainId == 42) {
+        // contract = new ethers.Contract(insert_kovan_address, abi, provider)
+    }
+    else {
+        console.log("invalid network");
+    }
+    return contract;
 }
 //@ts-ignore
 ethereum.on('chainChanged', function (chainId) {
