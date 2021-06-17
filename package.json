@@ -1,0 +1,19 @@
+{
+  "name": "token-xapp-alfa-kovan",
+  "version": "1.0.0",
+  "description": "an example token bridge xapp between alfajores and kovan using optics",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "watch": "tsc *.ts --watch",
+    "dev": "watchify index.js -o static/bundle.js & lite-server"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "browserify": "^17.0.0",
+    "ethers": "^5.3.1",
+    "lite-server": "^2.6.1",
+    "watchify": "^4.0.0"
+  }
+}
