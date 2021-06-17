@@ -20,7 +20,7 @@ const connectWallet = async function () {
           console.log(`⚠️ ${error}.`)
         }
       } else {
-        console.log("⚠️ Please install the CeloExtensionWallet.")
+        console.log("⚠️ Please install Metamask.")
       }
 }
 

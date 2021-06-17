@@ -68,7 +68,7 @@ var connectWallet = function () {
                     return [3 /*break*/, 5];
                 case 5: return [3 /*break*/, 7];
                 case 6:
-                    console.log("⚠️ Please install the CeloExtensionWallet.");
+                    console.log("⚠️ Please install Metamask.");
                     _a.label = 7;
                 case 7: return [2 /*return*/];
             }
