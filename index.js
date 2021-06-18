@@ -37,16 +37,17 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
 };
 exports.__esModule = true;
 var ethers_1 = require("ethers");
+var BridgeRouter_json_1 = require("./abi/BridgeRouter.json");
 var connectWallet = function () {
     return __awaiter(this, void 0, void 0, function () {
-        var provider, network, contract, error_1;
+        var provider, chainId, tokenBridgeRouter, error_1;
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    if (!window.ethereum) return [3 /*break*/, 6];
+                    if (!window.ethereum) return [3 /*break*/, 7];
                     _a.label = 1;
                 case 1:
-                    _a.trys.push([1, 4, , 5]);
+                    _a.trys.push([1, 5, , 6]);
                     //@ts-ignore
                     return [4 /*yield*/, window.ethereum.enable()
                         //@ts-ignore
@@ -54,22 +55,24 @@ var connectWallet = function () {
                 case 2:
                     //@ts-ignore
                     _a.sent();
-                    provider = new ethers_1.ethers.providers.Web3Provider(window.ethereum);
-                    return [4 /*yield*/, provider.getNetwork()];
+                    return [4 /*yield*/, new ethers_1.ethers.providers.Web3Provider(window.ethereum)];
                 case 3:
-                    network = _a.sent();
-                    setNetworkHtml(network.chainId);
-                    contract = setContract(network.chainId, provider);
-                    return [3 /*break*/, 5];
+                    provider = _a.sent();
+                    return [4 /*yield*/, provider.getNetwork()];
                 case 4:
+                    chainId = (_a.sent()).chainId;
+                    tokenBridgeRouter = setContract(chainId, provider);
+                    setNetworkHtml(chainId);
+                    return [3 /*break*/, 6];
+                case 5:
                     error_1 = _a.sent();
                     console.log("\u26A0\uFE0F " + error_1 + ".");
-                    return [3 /*break*/, 5];
-                case 5: return [3 /*break*/, 7];
-                case 6:
+                    return [3 /*break*/, 6];
+                case 6: return [3 /*break*/, 8];
+                case 7:
                     console.log("⚠️ Please install Metamask.");
-                    _a.label = 7;
-                case 7: return [2 /*return*/];
+                    _a.label = 8;
+                case 8: return [2 /*return*/];
             }
         });
     });
@@ -80,11 +83,14 @@ based on the current network detected, users should be shown different options
     if the network is alfajores
     - allow users to send CELO to kovan
     - allow users to send cETH to another alfajores account
+    - allow users to send cETH back to kovan
 
     if the network is kovan
     - allow users to send ETH to alfajores
     - allow users to send eCELO to another kovan account
+    - allow users to send eCELO back to alfajores
 */
+//@ts-ignore
 document.querySelector("#login").addEventListener("click", function (e) { return __awaiter(void 0, void 0, void 0, function () {
     return __generator(this, function (_a) {
         connectWallet();
@@ -93,9 +99,11 @@ document.querySelector("#login").addEventListener("click", function (e) { return
 }); });
 function setNetworkHtml(chainId) {
     if (chainId == 44787) {
+        //@ts-ignore
         document.querySelector("#network").textContent = "Alfajores";
     }
     else if (chainId == 42) {
+        //@ts-ignore
         document.querySelector("#network").textContent = "Kovan";
     }
     else {
@@ -103,17 +111,22 @@ function setNetworkHtml(chainId) {
     }
 }
 function setContract(chainId, provider) {
-    var contract;
-    if (chainId == 44787) {
-        // contract = new ethers.Contract(insert_alfa_address, abi, provider)
-    }
-    else if (chainId == 42) {
-        // contract = new ethers.Contract(insert_kovan_address, abi, provider)
-    }
-    else {
-        console.log("invalid network");
-    }
-    return contract;
+    return __awaiter(this, void 0, void 0, function () {
+        var contract;
+        return __generator(this, function (_a) {
+            if (chainId == 44787) {
+                contract = new ethers_1.ethers.Contract("0x9e643F570FAcB7Be198aC287d4926b18528b6E89", BridgeRouter_json_1.abi, provider);
+            }
+            else if (chainId == 42) {
+                contract = new ethers_1.ethers.Contract("0x9e643F570FAcB7Be198aC287d4926b18528b6E89", BridgeRouter_json_1.abi, provider);
+            }
+            else {
+                contract = null;
+                console.log("invalid network");
+            }
+            return [2 /*return*/, contract];
+        });
+    });
 }
 //@ts-ignore
 ethereum.on('chainChanged', function (chainId) {

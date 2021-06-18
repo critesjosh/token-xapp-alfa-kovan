@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "watch": "tsc *.ts --watch",
+    "compile": "tsc index.ts --resolveJsonModule",
     "dev": "watchify index.js -o static/bundle.js & lite-server"
   },
   "author": "",

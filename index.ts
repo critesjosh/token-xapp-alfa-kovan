@@ -1,4 +1,5 @@
-import { providers, Contract, ethers } from "ethers";
+import { Contract, ethers } from "ethers";
+import { Provider } from "@ethersproject/providers";
 import { abi } from "./abi/BridgeRouter.json"
 
 const connectWallet = async function () {
@@ -38,26 +39,29 @@ based on the current network detected, users should be shown different options
     - allow users to send eCELO back to alfajores
 */
 
+//@ts-ignore
 document.querySelector("#login").addEventListener("click", async (e) => {
     connectWallet()
 })
 
-function setNetworkHtml(chainId:Number){
+function setNetworkHtml(chainId: Number){
     if(chainId == 44787){
+        //@ts-ignore
         document.querySelector("#network").textContent = "Alfajores"
     } else if (chainId == 42){
+        //@ts-ignore
         document.querySelector("#network").textContent = "Kovan"
     } else {
         console.error("connect to alfajores or kovan.")
     }
 }
 
-async function setContract(chainId: Number, provider: providers.JsonRpcProvider): Promise<Contract | null>{
+async function setContract(chainId: Number, provider: Provider): Promise<Contract | null>{
     let contract: Contract | null
     if(chainId == 44787){
-        contract = new ethers.Contract(insert_alfa_address, abi, provider)
+        contract = new ethers.Contract("0x9e643F570FAcB7Be198aC287d4926b18528b6E89", abi, provider)
     } else if (chainId == 42){
-        contract = new ethers.Contract(insert_kovan_address, abi, provider)
+        contract = new ethers.Contract("0x9e643F570FAcB7Be198aC287d4926b18528b6E89", abi, provider)
     } else {
         contract = null
         console.log("invalid network")
