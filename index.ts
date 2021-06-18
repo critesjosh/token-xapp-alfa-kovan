@@ -30,10 +30,12 @@ based on the current network detected, users should be shown different options
     if the network is alfajores
     - allow users to send CELO to kovan
     - allow users to send cETH to another alfajores account
+    - allow users to send cETH back to kovan
 
     if the network is kovan
     - allow users to send ETH to alfajores
     - allow users to send eCELO to another kovan account
+    - allow users to send eCELO back to alfajores
 */
 
 document.querySelector("#login").addEventListener("click", async (e) => {
