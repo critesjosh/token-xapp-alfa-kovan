@@ -1,4 +1,4 @@
-import { ethers } from "ethers";
+import { providers, Contract, ethers } from "ethers";
 import { abi } from "./abi/BridgeRouter.json"
 
 const connectWallet = async function () {
@@ -8,13 +8,13 @@ const connectWallet = async function () {
           //@ts-ignore
           await window.ethereum.enable()
           //@ts-ignore
-          const provider = new ethers.providers.Web3Provider(window.ethereum)
-
-          let network = await provider.getNetwork()
-          setNetworkHtml(network.chainId)
+          const provider = await new ethers.providers.Web3Provider(window.ethereum)
+          let chainId = (await provider.getNetwork()).chainId
 
           // initalize contract
-          let contract = setContract(network.chainId, provider)
+          let tokenBridgeRouter = setContract(chainId, provider)
+          
+          setNetworkHtml(chainId)
 
         } catch (error) {
           console.log(`⚠️ ${error}.`)
@@ -50,13 +50,14 @@ function setNetworkHtml(chainId:Number){
     }
 }
 
-function setContract(chainId:Number, provider){
-    let contract
+async function setContract(chainId: Number, provider: providers.JsonRpcProvider): Promise<Contract | null>{
+    let contract: Contract | null
     if(chainId == 44787){
-        // contract = new ethers.Contract(insert_alfa_address, abi, provider)
+        contract = new ethers.Contract(insert_alfa_address, abi, provider)
     } else if (chainId == 42){
-        // contract = new ethers.Contract(insert_kovan_address, abi, provider)
+        contract = new ethers.Contract(insert_kovan_address, abi, provider)
     } else {
+        contract = null
         console.log("invalid network")
     }
     return contract

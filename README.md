@@ -1,6 +1,8 @@
 # token-xapp-alfa-kovan
 
-An example token bridge xapp between alfajores and kovan using optics
+An example token bridge xapp between alfajores and kovan using optics.
+
+Make sure Metamask is installed on your browser.
 
 `yarn` to install dependencies.
 
