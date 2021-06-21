@@ -1,6 +1,20 @@
 import { Contract, ethers } from "ethers";
 import { Provider } from "@ethersproject/providers";
 import { abi } from "./abi/BridgeRouter.json"
+import { BridgeRouter } from "./BridgeRouter";
+
+const alfajoresBridgeAddress: string = ""
+const kovanBridgeAddress: string = ""
+let tokenBridgeRouter: BridgeRouter
+let chainId: Number
+const alfajoresCeloAddress: string = "0xE51e1032Ff1D6CcC8152d53e9f0661aEdE2D98F8"
+const alfajoresDomain: ethers.BigNumberish = 1000
+const kovanDomain: ethers.BigNumberish = 3000
+const alfajoresChainId = 44787
+const kovanChainId = 42
+
+const recipient: string = "0x9e643F570FAcB7Be198aC287d4926b18528b6E89" // can be whatever
+const amountToSend: ethers.BigNumberish = ethers.utils.parseEther("0.01")
 
 const connectWallet = async function () {
     //@ts-ignore
@@ -10,10 +24,10 @@ const connectWallet = async function () {
           await window.ethereum.enable()
           //@ts-ignore
           const provider = await new ethers.providers.Web3Provider(window.ethereum)
-          let chainId = (await provider.getNetwork()).chainId
+          chainId = (await provider.getNetwork()).chainId
 
           // initalize contract
-          let tokenBridgeRouter = setContract(chainId, provider)
+          tokenBridgeRouter = setContract(chainId, provider)
           
           setNetworkHtml(chainId)
 
@@ -25,19 +39,27 @@ const connectWallet = async function () {
       }
 }
 
-/*
-based on the current network detected, users should be shown different options
 
-    if the network is alfajores
-    - allow users to send CELO to kovan
-    - allow users to send cETH to another alfajores account
-    - allow users to send cETH back to kovan
+// based on the current network detected, users should be shown different options
 
-    if the network is kovan
-    - allow users to send ETH to alfajores
-    - allow users to send eCELO to another kovan account
-    - allow users to send eCELO back to alfajores
-*/
+    // if the network is alfajores
+    // - allow users to send CELO to kovan
+    async function sendCeloToKovan(){
+        if(chainId != alfajoresChainId) throw "must be on alfajores network"
+        tokenBridgeRouter.send(alfajoresCeloAddress, alfajoresDomain, recipient, amountToSend)
+    }
+    // - allow users to send cETH to another alfajores account
+    async function sendcETH(){
+    }
+    // - allow users to send cETH back to kovan
+    async function sendcETHToKovan(){
+    }
+
+    // if the network is kovan
+    // - allow users to send ETH to alfajores
+    // - allow users to send eCELO to another kovan account
+    // - allow users to send eCELO back to alfajores
+
 
 //@ts-ignore
 document.querySelector("#login").addEventListener("click", async (e) => {
@@ -45,10 +67,10 @@ document.querySelector("#login").addEventListener("click", async (e) => {
 })
 
 function setNetworkHtml(chainId: Number){
-    if(chainId == 44787){
+    if(chainId == alfajoresChainId){
         //@ts-ignore
         document.querySelector("#network").textContent = "Alfajores"
-    } else if (chainId == 42){
+    } else if (chainId == kovanChainId){
         //@ts-ignore
         document.querySelector("#network").textContent = "Kovan"
     } else {
@@ -56,15 +78,16 @@ function setNetworkHtml(chainId: Number){
     }
 }
 
-async function setContract(chainId: Number, provider: Provider): Promise<Contract | null>{
-    let contract: Contract | null
-    if(chainId == 44787){
-        contract = new ethers.Contract("0x9e643F570FAcB7Be198aC287d4926b18528b6E89", abi, provider)
-    } else if (chainId == 42){
-        contract = new ethers.Contract("0x9e643F570FAcB7Be198aC287d4926b18528b6E89", abi, provider)
+function setContract(chainId: Number, provider: Provider): BridgeRouter{
+    let contract: BridgeRouter
+
+    if(chainId == alfajoresChainId){
+        contract = <BridgeRouter>new ethers.Contract(alfajoresBridgeAddress, abi, provider)
+    } else if (chainId == kovanChainId){
+        contract = <BridgeRouter>new ethers.Contract(kovanBridgeAddress, abi, provider)
     } else {
-        contract = null
         console.log("invalid network")
+        throw "invalid network"
     }
     return contract
 }
@@ -76,4 +99,4 @@ ethereum.on('chainChanged', (chainId) => {
     // We recommend reloading the page unless you have good reason not to.
     setNetworkHtml(chainId)
     // window.location.reload();
-  });
+});
