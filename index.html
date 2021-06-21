@@ -11,15 +11,16 @@
     <p>Currently connected to: <span id="network">Not connected</span></p>
 
     <p>Function: 
-      <select name="action">
+      <select id="action">
         <option value="sendXchain">Send Across Bridge</option>
         <option value="send" selected>Send on current chain</option>
         <option value="sendHome">Send back to home chain</option>
       </select>
     </p>
 
-    <p>Amount to send: <input type="text" id="name"></p>
-    
+    <p>Amount to send: <input type="text" id="amount"> CELO / ETH</p>
+    <button id="sendTx">Send</button>
+
     <script src="static/bundle.js"></script>
   </body>
 </html>
