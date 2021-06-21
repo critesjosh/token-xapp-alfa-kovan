@@ -45,13 +45,15 @@ const connectWallet = async function () {
     // if the network is alfajores
     // - allow users to send CELO to kovan
     async function sendCeloToKovan(){
-        if(chainId != alfajoresChainId) throw "must be on alfajores network"
-        tokenBridgeRouter.send(alfajoresCeloAddress, alfajoresDomain, recipient, amountToSend)
+        if(chainId != alfajoresChainId) throw "must be on the celo alfajores network"
+        tokenBridgeRouter.send(alfajoresCeloAddress, kovanDomain, recipient, amountToSend)
     }
     // - allow users to send cETH to another alfajores account
+    // NEED: what is the cETH contract address?
     async function sendcETH(){
     }
     // - allow users to send cETH back to kovan
+    // NEED: what is the cETH contract address?
     async function sendcETHToKovan(){
     }
 
@@ -93,10 +95,12 @@ function setContract(chainId: Number, provider: Provider): BridgeRouter{
 }
 
 //@ts-ignore
-ethereum.on('chainChanged', (chainId) => {
+ethereum.on('chainChanged', (_chainId) => {
     // Handle the new chain.
     // Correctly handling chain changes can be complicated.
     // We recommend reloading the page unless you have good reason not to.
-    setNetworkHtml(chainId)
+    setNetworkHtml(_chainId)
+    chainId = _chainId
+    console.log("new chain id", chainId)
     // window.location.reload();
 });
