@@ -1,10 +1,12 @@
 import { Contract, ethers } from "ethers";
 import { Provider } from "@ethersproject/providers";
-import { abi } from "./abi/BridgeRouter.json"
+import {abi} from "./abi/BridgeRouter.json"
+import * as ERC20 from "./abi/ERC20.json"
 import { BridgeRouter } from "./BridgeRouter";
 
 let tokenBridgeRouter: BridgeRouter
 let chainId: Number
+let account: string
 
 const alfajoresBridgeAddress: string = "0x0000000000000000000000000000000000000000"
 const kovanBridgeAddress: string     = "0x0000000000000000000000000000000000000000"
@@ -19,7 +21,7 @@ const kovanDomain: ethers.BigNumberish = 3000
 const alfajoresChainId = 44787
 const kovanChainId = 42
 
-const recipient: string = "0x9e643F570FAcB7Be198aC287d4926b18528b6E89" // can be whatever
+const recipient: string = "0x5038ae19CDf0B623e6e8015249ecF58A1165D653" // can be whatever
 
 const connectWallet = async function () {
     //@ts-ignore
@@ -29,13 +31,15 @@ const connectWallet = async function () {
           await window.ethereum.enable()
           //@ts-ignore
           const provider = await new ethers.providers.Web3Provider(window.ethereum)
+          account = (await provider.listAccounts())[0]
+
           chainId = (await provider.getNetwork()).chainId
 
           // initalize contract
           tokenBridgeRouter = setContract(chainId, provider)
           
           setNetworkHtml(chainId)
-
+            getBalances()
         } catch (error) {
           console.log(`⚠️ ${error}.`)
         }
@@ -67,20 +71,20 @@ async function send(_fx: string, _amountToSend: ethers.BigNumberish){
     if(chainId == alfajoresChainId){
         switch (_fx) {
             case "sendXchain":
-                tx = await tokenBridgeRouter.send(alfajoresCeloAddress, kovanDomain, recipient, _amountToSend)
+                tx = await tokenBridgeRouter.send(alfajoresCeloAddress, kovanDomain, account, _amountToSend)
             case "send":
                 tx = await tokenBridgeRouter.send(alfajorescETHAddress, alfajoresDomain, recipient, _amountToSend)
             case "sendHome":
-                tx = await tokenBridgeRouter.send(alfajorescETHAddress, kovanDomain, recipient, _amountToSend)
+                tx = await tokenBridgeRouter.send(alfajorescETHAddress, kovanDomain, account, _amountToSend)
         }
     } else if (chainId == kovanChainId){
         switch (_fx) {
             case "sendXchain":
-                tx = await tokenBridgeRouter.send(kovanWETHAddress, alfajoresDomain, recipient, _amountToSend)
+                tx = await tokenBridgeRouter.send(kovanWETHAddress, alfajoresDomain, account, _amountToSend)
             case "send":
                 tx = await tokenBridgeRouter.send(kovaneCeloAddress, kovanDomain, recipient, _amountToSend)
             case "sendHome":
-                tx = await tokenBridgeRouter.send(kovaneCeloAddress, alfajoresDomain, recipient, _amountToSend)
+                tx = await tokenBridgeRouter.send(kovaneCeloAddress, alfajoresDomain, account, _amountToSend)
         }
     } else {
         throw "please select the Kovan or Alfajores network"
@@ -117,12 +121,25 @@ function setNetworkHtml(chainId: Number){
     }
 }
 
+async function getBalances(){
+    let infura = new ethers.providers.InfuraProvider('kovan', '54a72648fd34496e91538859b4e37102')
+    let ethBalance = await infura.getBalance(account)
+
+    let datahub = new ethers.providers.JsonRpcProvider("https://celo-alfajores--rpc.datahub.figment.io/apikey/e892a66dc36e4d2d98a5d6406d609796/")
+    let celoBalance = await datahub.getBalance(account)
+    //@ts-ignore
+    document.querySelector("#kovanEthBalance").textContent = ethers.utils.formatUnits(ethBalance, "ether")
+    //@ts-ignore
+    document.querySelector("#alfaCeloBalance").textContent = ethers.utils.formatUnits(celoBalance, "ether")
+}
+
 function setContract(chainId: Number, provider: Provider): BridgeRouter{
     let contract: BridgeRouter
 
     if(chainId == alfajoresChainId){
         contract = <BridgeRouter>new ethers.Contract(alfajoresBridgeAddress, abi, provider)
     } else if (chainId == kovanChainId){
+        // @ts-ignore
         contract = <BridgeRouter>new ethers.Contract(kovanBridgeAddress, abi, provider)
     } else {
         console.log("invalid network")
