@@ -1,4 +1,4 @@
-# token-xapp-alfa-kovan
+# token-xapp-alfa-kovan (WIP)
 
 An example token bridge xapp between alfajores and kovan using optics.
 
