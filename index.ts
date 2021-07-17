@@ -2,24 +2,31 @@ import { Contract, ethers } from "ethers";
 import { Provider } from "@ethersproject/providers";
 import {abi} from "./abi/BridgeRouter.json"
 import * as ERC20 from "./abi/ERC20.json"
-import { BridgeRouter } from "./BridgeRouter";
+// import { BridgeRouter } from "./BridgeRouter";
 
-let tokenBridgeRouter: BridgeRouter
+let tokenBridgeRouterProvider: any
+let tokenBridgeRouterSigner: any
 let chainId: Number
 let account: string
 
-const alfajoresBridgeAddress: string = "0x0000000000000000000000000000000000000000"
-const kovanBridgeAddress: string     = "0x0000000000000000000000000000000000000000"
-const alfajoresCeloAddress: string   = "0xE51e1032Ff1D6CcC8152d53e9f0661aEdE2D98F8"
-const alfajorescETHAddress: string   = "0x0000000000000000000000000000000000000000"
-const kovaneCeloAddress: string      = "0x0000000000000000000000000000000000000000"
-const kovanWETHAddress: string       = "0x0000000000000000000000000000000000000000"
+// const alfajoresBridgeAddress: string = "0x0000000000000000000000000000000000000000"
+// const kovanBridgeAddress: string     = "0x0000000000000000000000000000000000000000"
+const alfajoresCeloAddress: string   = "0xF194afDf50B03e69Bd7D057c1Aa9e10c9954E4C9"
+// const alfajorescETHAddress: string   = "0x0000000000000000000000000000000000000000"
+// const kovaneCeloAddress: string      = "0x0000000000000000000000000000000000000000"
+// const kovanWETHAddress: string       = "0x0000000000000000000000000000000000000000"
+
+const kovanBridgeRouterAddress: string = "0xb0e9347457CcfC9B36476B58BBD542E6eBA25852"
+const alfaBridgeRouterAddress: string = "0x032ADec328A5aeB6b364ebA439a3a2d377D95CFf"
 
 const alfajoresDomain: ethers.BigNumberish = 1000
 const kovanDomain: ethers.BigNumberish = 3000
 
 const alfajoresChainId = 44787
 const kovanChainId = 42
+
+let provider: any
+let alfaCeloContract: any
 
 const recipient: string = "0x5038ae19CDf0B623e6e8015249ecF58A1165D653" // can be whatever
 
@@ -30,16 +37,20 @@ const connectWallet = async function () {
           //@ts-ignore
           await window.ethereum.enable()
           //@ts-ignore
-          const provider = await new ethers.providers.Web3Provider(window.ethereum)
+          provider = await new ethers.providers.Web3Provider(window.ethereum)
+          const signer = provider.getSigner()
           account = (await provider.listAccounts())[0]
-
           chainId = (await provider.getNetwork()).chainId
 
-          // initalize contract
-          tokenBridgeRouter = setContract(chainId, provider)
-          
+          // initalize contract & set signer
+          tokenBridgeRouterProvider = setBridgeContract(chainId, provider)
+          tokenBridgeRouterSigner = tokenBridgeRouterProvider.connect(signer)
+
+          alfaCeloContract = <Contract>new ethers.Contract(alfajoresCeloAddress, ERC20.abi, provider) 
+          alfaCeloContract = alfaCeloContract.connect(signer)
+
           setNetworkHtml(chainId)
-            getBalances()
+          updateBalances()
         } catch (error) {
           console.log(`⚠️ ${error}.`)
         }
@@ -48,6 +59,10 @@ const connectWallet = async function () {
       }
 }
 
+async function approve(){
+    console.log(alfaCeloContract)
+    await alfaCeloContract.approve(alfaBridgeRouterAddress, ethers.utils.parseUnits("1.0", 20))
+}
 
 // based on the current network detected, users should be shown different options
 
@@ -71,20 +86,26 @@ async function send(_fx: string, _amountToSend: ethers.BigNumberish){
     if(chainId == alfajoresChainId){
         switch (_fx) {
             case "sendXchain":
-                tx = await tokenBridgeRouter.send(alfajoresCeloAddress, kovanDomain, account, _amountToSend)
-            case "send":
-                tx = await tokenBridgeRouter.send(alfajorescETHAddress, alfajoresDomain, recipient, _amountToSend)
-            case "sendHome":
-                tx = await tokenBridgeRouter.send(alfajorescETHAddress, kovanDomain, account, _amountToSend)
+                console.log(alfajoresCeloAddress, _amountToSend, kovanDomain, ethers.utils.hexZeroPad(recipient, 32))
+                await approve()
+                tx = await tokenBridgeRouterSigner.send(alfajoresCeloAddress, _amountToSend, kovanDomain, ethers.utils.hexZeroPad(recipient, 32))
+            // case "send":
+            //     tx = await tokenBridgeRouter.send(alfajorescETHAddress, alfajoresDomain, recipient, _amountToSend)
+            // case "sendHome":
+            //     tx = await tokenBridgeRouter.send(alfajorescETHAddress, kovanDomain, account, _amountToSend)
+            default:
+                console.error("unrecognized function")
         }
     } else if (chainId == kovanChainId){
         switch (_fx) {
-            case "sendXchain":
-                tx = await tokenBridgeRouter.send(kovanWETHAddress, alfajoresDomain, account, _amountToSend)
-            case "send":
-                tx = await tokenBridgeRouter.send(kovaneCeloAddress, kovanDomain, recipient, _amountToSend)
-            case "sendHome":
-                tx = await tokenBridgeRouter.send(kovaneCeloAddress, alfajoresDomain, account, _amountToSend)
+            // case "sendXchain":
+            //     tx = await tokenBridgeRouter.send(kovanWETHAddress, alfajoresDomain, account, _amountToSend)
+            // case "send":
+            //     tx = await tokenBridgeRouter.send(kovaneCeloAddress, kovanDomain, recipient, _amountToSend)
+            // case "sendHome":
+            //     tx = await tokenBridgeRouter.send(kovaneCeloAddress, alfajoresDomain, account, _amountToSend)
+            default:
+                console.error("unrecognized function")    
         }
     } else {
         throw "please select the Kovan or Alfajores network"
@@ -106,7 +127,7 @@ document.querySelector("#sendTx").addEventListener("click", async (e) => {
     let fx = document.querySelector("#action").value
 
     console.log(fx, amountToSend)
-    // send(fx, amountToSend)
+    send(fx, amountToSend)
 })
 
 function setNetworkHtml(chainId: Number){
@@ -121,7 +142,7 @@ function setNetworkHtml(chainId: Number){
     }
 }
 
-async function getBalances(){
+async function updateBalances(){
     let infura = new ethers.providers.InfuraProvider('kovan', '54a72648fd34496e91538859b4e37102')
     let ethBalance = await infura.getBalance(account)
 
@@ -133,14 +154,14 @@ async function getBalances(){
     document.querySelector("#alfaCeloBalance").textContent = ethers.utils.formatUnits(celoBalance, "ether")
 }
 
-function setContract(chainId: Number, provider: Provider): BridgeRouter{
-    let contract: BridgeRouter
+function setBridgeContract(chainId: Number, provider: Provider): Contract{
+    let contract: Contract
 
     if(chainId == alfajoresChainId){
-        contract = <BridgeRouter>new ethers.Contract(alfajoresBridgeAddress, abi, provider)
+        contract = <Contract>new ethers.Contract(alfaBridgeRouterAddress, abi, provider)
     } else if (chainId == kovanChainId){
         // @ts-ignore
-        contract = <BridgeRouter>new ethers.Contract(kovanBridgeAddress, abi, provider)
+        contract = <Contract>new ethers.Contract(kovanBridgeRouterAddress, abi, provider)
     } else {
         console.log("invalid network")
         throw "invalid network"
