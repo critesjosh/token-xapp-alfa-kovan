@@ -16,8 +16,8 @@ const alfajoresCeloAddress: string   = "0xF194afDf50B03e69Bd7D057c1Aa9e10c9954E4
 // const kovaneCeloAddress: string      = "0x0000000000000000000000000000000000000000"
 // const kovanWETHAddress: string       = "0x0000000000000000000000000000000000000000"
 
-const kovanBridgeRouterAddress: string = "0xb0e9347457CcfC9B36476B58BBD542E6eBA25852"
-const alfaBridgeRouterAddress: string = "0x032ADec328A5aeB6b364ebA439a3a2d377D95CFf"
+const kovanBridgeRouterAddress: string = "0x281B1F8cdcA417886329546dbC882D849d9D7efA"
+const alfaBridgeRouterAddress: string = "0xf7DD76d7E888b36A331627db290420b1F1a8Bc90"
 
 const alfajoresDomain: ethers.BigNumberish = 1000
 const kovanDomain: ethers.BigNumberish = 3000
@@ -50,7 +50,7 @@ const connectWallet = async function () {
           alfaCeloContract = alfaCeloContract.connect(signer)
 
           setNetworkHtml(chainId)
-          updateBalances()
+          // updateBalances()
         } catch (error) {
           console.log(`⚠️ ${error}.`)
         }
@@ -60,7 +60,6 @@ const connectWallet = async function () {
 }
 
 async function approve(){
-    console.log(alfaCeloContract)
     await alfaCeloContract.approve(alfaBridgeRouterAddress, ethers.utils.parseUnits("1.0", 20))
 }
 
@@ -77,8 +76,6 @@ async function send(_fx: string, _amountToSend: ethers.BigNumberish){
             //     tx = await tokenBridgeRouter.send(alfajorescETHAddress, alfajoresDomain, recipient, _amountToSend)
             // case "sendHome":
             //     tx = await tokenBridgeRouter.send(alfajorescETHAddress, kovanDomain, account, _amountToSend)
-            default:
-                console.error("unrecognized function")
         }
     } else if (chainId == kovanChainId){
         switch (_fx) {
@@ -88,8 +85,6 @@ async function send(_fx: string, _amountToSend: ethers.BigNumberish){
             //     tx = await tokenBridgeRouter.send(kovaneCeloAddress, kovanDomain, recipient, _amountToSend)
             // case "sendHome":
             //     tx = await tokenBridgeRouter.send(kovaneCeloAddress, alfajoresDomain, account, _amountToSend)
-            default:
-                console.error("unrecognized function")    
         }
     } else {
         throw "please select the Kovan or Alfajores network"
