@@ -64,22 +64,6 @@ async function approve(){
     await alfaCeloContract.approve(alfaBridgeRouterAddress, ethers.utils.parseUnits("1.0", 20))
 }
 
-// based on the current network detected, users should be shown different options
-
-    // if the network is alfajores
-    // - allow users to send CELO to kovan
-    async function sendCeloToKovan(_amountToSend: ethers.BigNumberish){}
-    // - allow users to send cETH to another alfajores account
-    // NEED: what is the cETH contract address?
-    async function sendcETH(){}
-    // - allow users to send cETH back to kovan
-    // NEED: what is the cETH contract address?
-    async function sendcETHToKovan(){}
-
-    // if the network is kovan
-    // - allow users to send ETH to alfajores
-    // - allow users to send eCELO to another kovan account
-    // - allow users to send eCELO back to alfajores
 async function send(_fx: string, _amountToSend: ethers.BigNumberish){
     let tx
 
